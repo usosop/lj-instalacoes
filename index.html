@@ -68,6 +68,17 @@
       ::-webkit-scrollbar-thumb:hover {
         background: #7d0e03;
       }
+      
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      /* Hide scrollbar for IE, Edge and Firefox */
+      .scrollbar-hide {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+      }
+
       .glass-card {
         background: rgba(34, 34, 34, 0.4);
         backdrop-filter: blur(12px);
@@ -99,7 +110,6 @@
     </style>
 
     <!-- Import Map for React Dependencies -->
-    <!-- FIX: Pinned versions to ensure Lucide uses the same React instance as the main app -->
     <script type="importmap">
     {
       "imports": {
@@ -251,6 +261,7 @@
       const NAV_ITEMS = [
         { label: 'Início', href: '#hero' },
         { label: 'Serviços', href: '#services' },
+        { label: 'Quem Somos', href: '#about' },
         { label: 'Galeria', href: '#gallery' },
         { label: 'Avaliações', href: '#testimonials' },
         { label: 'Contato', href: '#contact' },
@@ -296,6 +307,7 @@
         const [isMenuOpen, setIsMenuOpen] = useState(false);
         const [scrolled, setScrolled] = useState(false);
         const [activeCategory, setActiveCategory] = useState('Todos');
+        const servicesContainerRef = useRef(null);
 
         useEffect(() => {
           const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -322,6 +334,17 @@
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
             window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
             setIsMenuOpen(false);
+          }
+        };
+
+        const scrollServices = (direction) => {
+          if (servicesContainerRef.current) {
+            const container = servicesContainerRef.current;
+            const scrollAmount = container.clientWidth * 0.8;
+            container.scrollBy({ 
+              left: direction === 'right' ? scrollAmount : -scrollAmount, 
+              behavior: 'smooth' 
+            });
           }
         };
 
@@ -471,30 +494,103 @@
             <Section id="services" className="bg-lj-black relative">
               <div className="container mx-auto px-6 md:px-12">
                 <FadeIn>
-                  <div className="text-center mb-16">
+                  <div className="text-center mb-8 md:mb-16">
                     <span className="text-lj-red font-bold tracking-[0.2em] uppercase text-xs">O que fazemos</span>
                     <h2 className="text-3xl md:text-5xl font-bold mt-3 text-white">Soluções Completas</h2>
                     <p className="text-lg text-lj-grey max-w-2xl mx-auto mt-4">
-                      Da segurança à elétrica, oferecemos um ecossistema completo de serviços para sua residência ou empresa.
+                      Do alarme à instalação elétrica, cuidamos de cada detalhe. Receba um serviço técnico de alto padrão que garante a segurança total da sua família ou do seu negócio.
                     </p>
                   </div>
                 </FadeIn>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {/* Mobile Navigation Controls */}
+                <div className="flex md:hidden justify-end gap-2 mb-4 px-1">
+                  <button
+                    onClick={() => scrollServices('left')}
+                    className="p-2 rounded-full border border-lj-dark bg-lj-black text-lj-grey hover:text-white hover:border-lj-red transition-all active:scale-95"
+                    aria-label="Anterior"
+                  >
+                    <ChevronRight className="w-5 h-5 rotate-180" />
+                  </button>
+                  <button
+                    onClick={() => scrollServices('right')}
+                    className="p-2 rounded-full border border-lj-dark bg-lj-black text-lj-grey hover:text-white hover:border-lj-red transition-all active:scale-95"
+                    aria-label="Próximo"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Updated Services Container: Mobile Horizontal Scroll, Desktop Grid */}
+                <div 
+                  ref={servicesContainerRef}
+                  className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 -mx-6 px-6 md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6 md:pb-0 scrollbar-hide"
+                >
                   {SERVICES.map((service, index) => (
-                    <FadeIn key={index} delay={index * 50} className="h-full">
-                      <div className="group h-full p-8 rounded-lg bg-lj-dark/30 hover:bg-lj-dark/60 border border-lj-dark/50 hover:border-lj-red/50 transition-all duration-300 hover:-translate-y-2 flex flex-col items-start gap-4 cursor-default">
-                        <div className="p-3 rounded-md bg-lj-black border border-lj-dark group-hover:border-lj-red/50 group-hover:shadow-[0_0_15px_rgba(229,50,27,0.2)] transition-all duration-300">
-                          <service.icon className="w-6 h-6 text-lj-grey group-hover:text-lj-red transition-colors" />
+                    <div key={index} className="min-w-[280px] w-[85vw] sm:w-[350px] md:w-auto md:min-w-0 snap-center h-full">
+                      <FadeIn delay={index * 50} className="h-full">
+                        <div className="group h-full p-8 rounded-lg bg-lj-dark/30 hover:bg-lj-dark/60 border border-lj-dark/50 hover:border-lj-red/50 transition-all duration-300 hover:-translate-y-2 flex flex-col items-start gap-4 cursor-default">
+                          <div className="p-3 rounded-md bg-lj-black border border-lj-dark group-hover:border-lj-red/50 group-hover:shadow-[0_0_15px_rgba(229,50,27,0.2)] transition-all duration-300">
+                            <service.icon className="w-6 h-6 text-lj-grey group-hover:text-lj-red transition-colors" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-lj-red transition-colors">{service.title}</h3>
+                            <p className="text-sm text-lj-grey leading-relaxed">{service.description}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-white mb-2 group-hover:text-lj-red transition-colors">{service.title}</h3>
-                          <p className="text-sm text-lj-grey leading-relaxed">{service.description}</p>
-                        </div>
-                      </div>
-                    </FadeIn>
+                      </FadeIn>
+                    </div>
                   ))}
                 </div>
+              </div>
+            </Section>
+
+            <BlurDivider />
+
+            {/* --- ABOUT SECTION (NEW) --- */}
+            <Section id="about" className="bg-lj-dark/10 relative">
+              <div className="container mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-12 items-center">
+                <FadeIn direction="right">
+                  <div className="relative">
+                    <div className="absolute -inset-4 bg-gradient-to-r from-lj-red to-lj-deepRed opacity-20 blur-lg rounded-lg transform rotate-2"></div>
+                    <div className="relative rounded-lg overflow-hidden shadow-2xl bg-lj-black/40 backdrop-blur-sm">
+                        {/* Changed to allow natural image aspect ratio so it's not cropped */}
+                        <img 
+                          src="https://i.imgur.com/dhdwc9X.jpg" 
+                          alt="LJ Instalações - Sobre Nós" 
+                          className="w-full h-auto object-contain max-h-[500px] mx-auto" 
+                        />
+                    </div>
+                  </div>
+                </FadeIn>
+
+                <FadeIn direction="left" delay={200}>
+                  <span className="text-lj-red font-bold tracking-[0.2em] uppercase text-xs">Sobre Nós</span>
+                  <h2 className="text-3xl md:text-5xl font-bold mt-3 text-white mb-6">Quem Somos</h2>
+                  
+                  <div className="space-y-6 text-lj-grey text-base md:text-lg leading-relaxed">
+                    <p>
+                      A <strong className="text-white">LJ Instalações</strong> é especializada em segurança eletrônica, oferecendo soluções completas em instalação e manutenção de câmeras de segurança, alarmes, cercas elétricas, interfones, videoporteiros e automatizadores de portão.
+                    </p>
+                    <p>
+                      Atendemos com agilidade, compromisso e qualidade, sempre priorizando a segurança dos nossos clientes. Atendemos residências, comércios e empresas com serviço técnico de confiança e suporte personalizado.
+                    </p>
+                    <p>
+                      Na LJ Instalações, atuamos com compromisso, agilidade e qualidade, levando tranquilidade e confiança. <span className="text-lj-red font-bold">Conte conosco para proteger o que é mais importante pra você!</span>
+                    </p>
+                  </div>
+
+                  <div className="mt-8 pt-8 border-t border-lj-dark/50 grid grid-cols-2 gap-4">
+                     <div>
+                       <h4 className="text-white font-bold text-xl">100%</h4>
+                       <p className="text-sm text-lj-grey">Compromisso</p>
+                     </div>
+                     <div>
+                       <h4 className="text-white font-bold text-xl">24h</h4>
+                       <p className="text-sm text-lj-grey">Monitoramento</p>
+                     </div>
+                  </div>
+                </FadeIn>
               </div>
             </Section>
 
